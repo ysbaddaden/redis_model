@@ -17,14 +17,20 @@ class FindersTest < Test::Unit::TestCase
     assert_equal [], Row.all
   end
 
-#  def test_exists?
-#  end
+  def test_exists?
+    assert Post.exists?(posts(:welcome).id)
+    refute Post.exists?(1234567890)
+  end
 
-#  def test_first
-#  end
+  def test_first
+    assert_equal posts(:welcome).id, Post.first.id
+    assert_nil Row.first
+  end
 
-#  def test_last
-#  end
+  def test_last
+    assert_equal posts(:post1).id, Post.last.id
+    assert_nil Row.last
+  end
 
 #  def test_reload
 #  end

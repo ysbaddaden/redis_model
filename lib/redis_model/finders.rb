@@ -34,13 +34,13 @@ module RedisModel
       end
 
       def first
-        ary = connection.lrange(key(:all), -1, -1)
-        instanciate(ary.first) if ary.any?
+        ids = connection.lrange(key(:all), 0, 0)
+        instanciate(connection.hgetall(key(ids.first))) if ids.any?
       end
 
       def last
-        ary = connection.lrange(key(:all), 0, 0)
-        instanciate(ary.first) if ary.any?
+        ids = connection.lrange(key(:all), -1, -1)
+        instanciate(connection.hgetall(key(ids.first))) if ids.any?
       end
 
       protected
