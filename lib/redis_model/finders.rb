@@ -9,22 +9,24 @@ module RedisModel
         connection.llen(key(:all))
       end
 
+      def hkey(attr_name)
+        key("*->#{attr_name}")
+      end
+
       def all
-        connection.lrange(key(:all), 0, -1).collect do |id|
-          instanciate(connection.hgetall(key(id)))
+        keys = attribute_names.sort
+        results = connection.sort(key(:all), :by => :nosort, :get => keys.collect { |k| hkey(k) })
+        collection = []
+        results.each_slice(keys.size) do |values|
+          collection << instanciate(Hash[ *keys.zip(values).flatten ])
         end
+        collection
       end
 
       def find(id)
         attributes = connection.hgetall(key(id))
-        if attributes.empty?
-          raise RedisModel::RecordNotFound.new("No such #{model_name} with id: #{id}")
-        else
-          record = new(attributes)
-          record.id = id
-          record.persisted!
-          record
-        end
+        raise RedisModel::RecordNotFound.new("No such #{model_name} with id: #{id}") if attributes.empty?
+        instanciate(attributes)
       end
 
       def exists?(id)
@@ -44,7 +46,7 @@ module RedisModel
       protected
         def instanciate(attributes)
           record = new(attributes)
-          record.id = attributes['id']
+          record.id = attributes[:id] || attributes['id']
           record.persisted!
           record
         end
