@@ -1,28 +1,42 @@
 module RedisModel
   module Finders
     def self.included(klass)
-      klass.extend(self)
+      klass.extend(ClassMethods)
     end
 
     module ClassMethods
-      def self.all
-        connection.lrange(key(:all), 0, -1).collect do |attributes|
-          instanciate(attributes)
+      def count
+        connection.llen(key(:all))
+      end
+
+      def all
+        connection.lrange(key(:all), 0, -1).collect do |id|
+          instanciate(connection.hgetall(key(id)))
         end
       end
 
-      def self.find(id)
-        record = new
-        record.id = id
-        record.reload
+      def find(id)
+        attributes = connection.hgetall(key(id))
+        if attributes.empty?
+          raise RedisModel::RecordNotFound.new("No such #{model_name} with id: #{id}")
+        else
+          record = new(attributes)
+          record.id = id
+          record.persisted!
+          record
+        end
       end
 
-      def self.first
+      def exists?(id)
+        connection.exists(key(id))
+      end
+
+      def first
         ary = connection.lrange(key(:all), -1, -1)
         instanciate(ary.first) if ary.any?
       end
 
-      def self.last
+      def last
         ary = connection.lrange(key(:all), 0, 0)
         instanciate(ary.first) if ary.any?
       end

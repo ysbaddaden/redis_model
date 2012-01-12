@@ -1,6 +1,9 @@
 # IMPROVE: UUID identifiers?
 # IMPROVE: counters
 module RedisModel
+  class RecordNotFound < StandardError
+  end
+
   class Base
     extend  ActiveModel::Naming
     include ActiveModel::AttributeMethods

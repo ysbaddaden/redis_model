@@ -1,0 +1,31 @@
+require_relative './test_helper'
+
+class FindersTest < Test::Unit::TestCase
+  def test_count
+    assert_equal posts.size, Post.count
+    assert_equal rows.size,  Row.count
+  end
+
+  def test_find
+    assert_raises(RedisModel::RecordNotFound) { Post.find(12346890) }
+    assert_nothing_raised { Post.find(posts(:welcome).id) }
+    assert_nothing_raised { Post.find(posts(:post1).id) }
+  end
+
+  def test_all
+    assert_equal [ posts(:welcome).id, posts(:post1).id ], Post.all.collect(&:id)
+    assert_equal [], Row.all
+  end
+
+#  def test_exists?
+#  end
+
+#  def test_first
+#  end
+
+#  def test_last
+#  end
+
+#  def test_reload
+#  end
+end
