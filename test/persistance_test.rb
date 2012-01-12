@@ -44,13 +44,27 @@ class PersistanceTest < ActiveSupport::TestCase
 #  def test_create_failure
 #  end
 
-#  def test_update
-#  end
+  def test_update_attributes
+    post = posts(:welcome)
+    post.update_attributes(:title => "go away")
+    assert_equal "go away", post.title
+    assert_equal "go away", Post.find(post.id).title
+  end
+
+  def test_class_update
+    post = Post.update(posts(:welcome).id, :title => "go away")
+    assert_instance_of Post, post
+    assert_equal "go away", post.title
+    assert_equal "go away", Post.find(posts(:welcome).id).title
+  end
 
 #  def test_update_failure
 #  end
 
 #  def test_delete
+#  end
+
+#  def test_class_delete
 #  end
 
 #  def test_delete_failure
@@ -59,15 +73,9 @@ class PersistanceTest < ActiveSupport::TestCase
 #  def test_destroy
 #  end
 
-#  def test_destroy_failure
-#  end
-
-#  def test_class_update
-#  end
-
 #  def test_class_destroy
 #  end
 
-#  def test_class_delete
+#  def test_destroy_failure
 #  end
 end
