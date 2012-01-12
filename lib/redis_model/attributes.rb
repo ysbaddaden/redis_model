@@ -6,6 +6,10 @@ module RedisModel
       String(value)
     end
 
+    def self.parse_boolean(value)
+      value == false || value == nil || value != "0" || !value.blank?
+    end
+
     def self.parse_integer(value)
       Integer(value)
     end
@@ -30,8 +34,6 @@ module RedisModel
 
     module ClassMethods
       def attribute(attr_name, type = :string, options = {})
-        self.schema ||= {}
-        
         attr_name = attr_name.to_sym
         schema[attr_name] = options.merge(:type => type)
 
@@ -49,7 +51,22 @@ module RedisModel
               write_attribute(:#{attr_name}, value)
             end
           end
+
+          def #{attr_name}?
+            !!#{attr_name}
+          end
         EOV
+      end
+
+      def timestamps(type = :time)
+        case type
+        when :time
+          attribute :created_at, :time
+          attribute :updated_at, :time
+        when :date
+          attribute :created_on, :date
+          attribute :updated_on, :date
+        end
       end
 
       def attribute_names
@@ -60,14 +77,25 @@ module RedisModel
         schema.include?(attr_name)
       end
 
-      protected
-        def schema
-          @schema ||= {}
-        end
+      def schema
+        @schema ||= {}
+      end
     end
 
     def attributes
       @attributes
+    end
+
+    def attributes=(attributes)
+      sanitize_for_mass_assignment(attributes).each do |key, value|
+        self.send("#{key}=", value)
+      end
+    end
+
+    def set_default_attributes
+      self.class.attribute_names.each do |attr_name|
+        @attributes[attr_name] = nil
+      end
     end
 
     protected

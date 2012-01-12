@@ -1,6 +1,6 @@
 class Row < RedisModel::Base
-  attribute :position,   :integer
-  attribute :price,      :float
-  attribute :created_on, :date
-  attribute :updated_on, :date
+  attribute  :position,   :integer
+  attribute  :name
+  attribute  :price,      :float
+  timestamps :date
 end

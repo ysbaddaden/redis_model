@@ -1,7 +1,12 @@
-gem 'redis'
-require 'redis'
-
 module RedisModel
+  def self.connection
+    @@connection ||= Redis.new
+  end
+
+  def self.connection=(redis)
+    @@connection = redis
+  end
+
   module Connection
     def self.included(klass)
       klass.extend ClassMethods
@@ -9,7 +14,7 @@ module RedisModel
 
     module ClassMethods
       def connection
-        @connection || @@connection ||= ::Redis.new
+        @connection || RedisModel.connection
       end
 
       def connection=(redis)
@@ -18,11 +23,7 @@ module RedisModel
     end
 
     def connection
-      @connection || self.class.connection
-    end
-
-    def connection=(redis)
-      @connection = redis
+      self.class.connection
     end
   end
 end
