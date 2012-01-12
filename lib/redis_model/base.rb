@@ -24,9 +24,6 @@ module RedisModel
       self.attributes = attributes
     end
 
-    attribute :id, :integer
-    attr_protected :id
-
     def new_record?
       id.nil?
     end

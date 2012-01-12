@@ -44,6 +44,8 @@ module RedisModel
   module Attributes
     def self.included(klass) # :nodoc:
       klass.extend(ClassMethods)
+#      klass.attribute :id, :integer
+#      klass.attr_protected :id
     end
 
     module ClassMethods
@@ -107,7 +109,11 @@ module RedisModel
       end
 
       def schema
+        return @schema unless @schema.nil?
         @schema ||= {}
+        attribute :id, :integer
+        attr_protected :id
+        @schema
       end
     end
 

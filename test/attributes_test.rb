@@ -2,7 +2,8 @@ require_relative './test_helper'
 
 class AttributesTest < Test::Unit::TestCase
   def test_attribute_names
-    assert_equal [ :title, :body, :approved, :created_at, :updated_at ], Post.attribute_names
+    assert_equal [ :id, :title, :body, :approved, :created_at, :updated_at ], Post.attribute_names
+    assert_equal [ :id, :position, :name, :price, :created_on, :updated_on ], Row.attribute_names
   end
 
   def test_attribute_exists?

@@ -3,6 +3,7 @@ require_relative './test_helper'
 class SerializersTest < Test::Unit::TestCase
   def test_to_hash_with_empty_model
     assert_equal({
+      :id => nil,
       :title => nil,
       :body => nil,
       :approved => nil,
@@ -11,6 +12,7 @@ class SerializersTest < Test::Unit::TestCase
     }, Post.new.serializable_hash)
     
     assert_equal({
+      :id => nil,
       :name => nil,
       :position => nil,
       :price => nil,
@@ -21,6 +23,7 @@ class SerializersTest < Test::Unit::TestCase
 
   def test_to_hash
     assert_equal({
+      :id => nil,
       :title => "getting started",
       :body => nil,
       :approved => nil,
@@ -29,6 +32,7 @@ class SerializersTest < Test::Unit::TestCase
     }, Post.new(:title => "getting started").serializable_hash)
     
     assert_equal({
+      :id => nil,
       :name => "cellphone",
       :price => 2.0,
       :position => nil,
@@ -39,6 +43,7 @@ class SerializersTest < Test::Unit::TestCase
 
   def test_as_json
     assert_equal({
+      :id => nil,
       :title => nil,
       :body => nil,
       :approved => nil,
@@ -47,6 +52,7 @@ class SerializersTest < Test::Unit::TestCase
     }, Post.new.as_json)
     
     assert_equal({
+      :id => nil,
       :name => nil,
       :position => nil,
       :price => nil,
