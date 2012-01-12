@@ -7,7 +7,7 @@ module RedisModel
     end
 
     def self.parse_boolean(value)
-      value == false || value == nil || value != "0" || !value.blank?
+      value == false || value == nil || value != 0 || value != "0" || !value.blank?
     end
 
     def self.parse_integer(value)
@@ -19,11 +19,25 @@ module RedisModel
     end
 
     def self.parse_date(value)
-      Date.parse(value)
+      case value
+      when Date
+        value
+      when Time
+        value.to_date
+      else
+        Date.parse(value)
+      end
     end
 
     def self.parse_time(value)
-      Time.parse(value)
+      case value
+      when Time
+        value
+      when Date
+        value.to_time
+      else
+        Time.parse(value)
+      end
     end
   end
 
@@ -33,6 +47,21 @@ module RedisModel
     end
 
     module ClassMethods
+      # Declares an attribute.
+      # 
+      # Types:
+      # 
+      # - <tt>:string</tt> (default)
+      # - <tt>:boolean</tt>
+      # - <tt>:integer</tt>
+      # - <tt>:float</tt>
+      # - <tt>:date</tt>
+      # - <tt>:time</tt>
+      # 
+      # Options:
+      # 
+      # - <tt>:default</tt> - default attribute value
+      # 
       def attribute(attr_name, type = :string, options = {})
         attr_name = attr_name.to_sym
         schema[attr_name] = options.merge(:type => type)
@@ -41,12 +70,12 @@ module RedisModel
 
         class_eval <<-EOV
           def #{attr_name}
-            value = read_attribute(:#{attr_name})
-            Types::parse_#{type}(value) unless value.nil?
+            read_attribute(:#{attr_name})
           end
 
           def #{attr_name}=(value)
-            unless value.to_s == read_attribute(value)
+            value = Types::parse_#{type}(value) unless value.nil?
+            unless value == read_attribute(:#{attr_name})
               #{attr_name}_will_change!
               write_attribute(:#{attr_name}, value)
             end
@@ -94,7 +123,7 @@ module RedisModel
 
     def set_default_attributes
       self.class.attribute_names.each do |attr_name|
-        @attributes[attr_name] = nil
+        @attributes[attr_name] = self.class.schema[attr_name][:defaults]
       end
     end
 
@@ -104,7 +133,7 @@ module RedisModel
       end
 
       def write_attribute(attr_name, value)
-        @attributes[attr_name] = value.to_s
+        @attributes[attr_name] = value
       end
   end
 end
