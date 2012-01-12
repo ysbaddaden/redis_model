@@ -60,10 +60,7 @@ module RedisModel
       self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
       
       connection.multi do
-#        connection.hmset(key, attributes.flatten)
-        attributes.each do |attr_name, value|
-          connection.hset(key, attr_name, value.to_s)
-        end
+        connection.hmset(key, *attributes.flatten)
         connection.rpush(self.class.key(:all), self.id)
       end
       
@@ -73,14 +70,7 @@ module RedisModel
     def update
       self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
       self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
-      
-#      connection.hmset(key, attributes.flatten)
-      connection.multi do
-        attributes.each do |attr_name, value|
-          connection.hset(key, attr_name, value.to_s)
-        end
-      end
-      
+      connection.hmset(key, *attributes.flatten)
       persisted!
     end
 
