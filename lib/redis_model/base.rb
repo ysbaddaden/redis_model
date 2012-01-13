@@ -27,9 +27,5 @@ module RedisModel
     def new_record?
       id.nil?
     end
-
-    def persisted?
-      !new_record?
-    end
   end
 end

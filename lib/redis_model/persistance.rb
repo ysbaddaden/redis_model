@@ -30,12 +30,14 @@ module RedisModel
       def delete(id)
         connection.multi do
           connection.del(key(id))
-          connection.lrem(id)
+          connection.lrem(key(:all), 0, id)
         end
       end
 
       def destroy(id)
-        find(id).destroy
+        record = find(id)
+        record.destroy
+        record
       end
     end
 
@@ -86,15 +88,29 @@ module RedisModel
 
     def delete
       self.class.delete(id)
+      destroyed!
     end
 
     def destroy
       delete
+      self
+    end
+
+    def persisted?
+      !(new_record? || destroyed?)
+    end
+
+    def destroyed?
+      @destroyed == true
     end
 
     def persisted! # :nodoc:
       @previously_changed = changes
       @changed_attributes.clear
+    end
+
+    def destroyed! # :nodoc:
+      @destroyed = true
     end
   end
 end

@@ -61,20 +61,40 @@ class PersistanceTest < ActiveSupport::TestCase
 #  def test_update_failure
 #  end
 
-#  def test_delete
-#  end
+  def test_delete
+    assert_difference('Post.count', -1) do
+      posts(:welcome).delete
+      posts(:welcome).destroyed?
+    end
+    refute Post.exists?(posts(:welcome).id)
+  end
 
-#  def test_class_delete
-#  end
+  def test_class_delete
+    assert_difference('Post.count', -1) do
+      Post.delete(posts(:welcome).id)
+    end
+    refute Post.exists?(posts(:welcome).id)
+  end
 
 #  def test_delete_failure
 #  end
 
-#  def test_destroy
-#  end
+  def test_destroy
+    assert_difference('Post.count', -1) do
+      post = posts(:welcome).destroy
+      assert post.destroyed?
+    end
+    refute Post.exists?(posts(:welcome).id)
+  end
 
-#  def test_class_destroy
-#  end
+  def test_class_destroy
+    assert_difference('Post.count', -1) do
+      post = Post.destroy(posts(:welcome).id)
+      assert_instance_of Post, post
+      assert post.destroyed?
+    end
+    refute Post.exists?(posts(:welcome).id)
+  end
 
 #  def test_destroy_failure
 #  end
