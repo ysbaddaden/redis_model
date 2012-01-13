@@ -2,9 +2,7 @@ require 'active_model/errors'
 
 module RedisModel
   module Validations
-    def self.included(klass)
-      klass.extend ClassMethods
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def human_attribute_name(attr_name, options = {})

@@ -8,9 +8,7 @@ module RedisModel
   end
 
   module Connection
-    def self.included(klass)
-      klass.extend ClassMethods
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def connection

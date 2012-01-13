@@ -1,8 +1,6 @@
 module RedisModel
   module Finders
-    def self.included(klass)
-      klass.extend(ClassMethods)
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       def count

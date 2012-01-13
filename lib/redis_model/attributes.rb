@@ -42,11 +42,7 @@ module RedisModel
   end
 
   module Attributes
-    def self.included(klass) # :nodoc:
-      klass.extend(ClassMethods)
-#      klass.attribute :id, :integer
-#      klass.attr_protected :id
-    end
+    extend ActiveSupport::Concern
 
     module ClassMethods
       # Declares an attribute.
