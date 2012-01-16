@@ -51,8 +51,9 @@ module RedisModel
     end
 
     def reload
-      @attributes = {}
       attributes = connection.hgetall(key)
+      @attributes = {}
+      self.attributes = attributes
       persisted!
       self
     end

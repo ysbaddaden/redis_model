@@ -7,9 +7,10 @@ class FindersTest < Test::Unit::TestCase
   end
 
   def test_find
-    assert_raises(RedisModel::RecordNotFound) { Post.find(12346890) }
+    assert_instance_of Post, Post.find(posts(:welcome).id)
     assert_nothing_raised { Post.find(posts(:welcome).id) }
     assert_nothing_raised { Post.find(posts(:post1).id) }
+    assert_raises(RedisModel::RecordNotFound) { Post.find(12346890) }
   end
 
   def test_all
@@ -32,6 +33,14 @@ class FindersTest < Test::Unit::TestCase
     assert_nil Row.last
   end
 
-#  def test_reload
-#  end
+  def test_reload
+    post = posts(:post1)
+    back = Post.find(post.id)
+    
+    post.update_attributes(:title => "Some other title")
+    assert_not_equal back.title, post.title
+    
+    assert_same back, back.reload
+    assert_equal "Some other title", back.title
+  end
 end

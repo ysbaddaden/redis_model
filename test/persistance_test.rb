@@ -1,6 +1,18 @@
 require_relative './test_helper'
 
 class PersistanceTest < ActiveSupport::TestCase
+  def test_class_key
+    assert_equal "Post", Post.key
+    assert_equal "Row",  Row.key
+    assert_equal "Post:all", Post.key(:all)
+    assert_equal "Post:123", Post.key(123)
+    assert_equal "Row:456",  Row.key(456)
+  end
+
+  def test_key
+    assert_equal "Post:#{posts(:welcome).id}", posts(:welcome).key
+  end
+
   def test_class_create
     assert_difference('Row.count') do
       row = Row.create(:name => "my secret")

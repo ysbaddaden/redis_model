@@ -1,5 +1,6 @@
+RACK_ENV ||= 'test'
 require 'bundler/setup'
-Bundler.setup(:default, :test)
+Bundler.setup(:default, RACK_ENV)
 
 require_relative '../lib/redis_model'
 require_relative 'models/post.rb'
