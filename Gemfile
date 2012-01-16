@@ -1,7 +1,11 @@
 source 'http://rubygems.org'
 
+gem "i18n"
 gem "activesupport", "~> 3.1"
 gem "activemodel",   "~> 3.1"
-gem "redis"
-gem "turn"
+
+group :test do
+  gem "redis"
+  gem "turn"
+end
 
