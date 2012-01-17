@@ -28,9 +28,8 @@ class Test::Unit::TestCase
     self.class.load_fixtures
   end
 
-  def assert_respond_to(object, method, message = nil)
-    klass_name = object.respond_to?(:class) ? object.class.name : object.name
-    message ||= "Expected #{klass_name} to respond to :#{method}"
+  def assert_respond_to(method, object, message = nil)
+    message ||= "Expected #{object} to respond to :#{method}"
     assert object.respond_to?(method), message
   end
 end

@@ -26,9 +26,9 @@ class AttributesTest < Test::Unit::TestCase
     [ Post, Row, Comment ].each do |model|
       obj = model.new
       model.attribute_names.each do |attr_name|
-        assert_respond_to obj, attr_name
-        assert_respond_to obj, attr_name.to_s + "="
-        assert_respond_to obj, attr_name.to_s + "_will_change!"
+        assert_respond_to attr_name, obj
+        assert_respond_to attr_name.to_s + "=", obj
+        assert_respond_to attr_name.to_s + "_will_change!", obj
       end
     end
   end
