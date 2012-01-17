@@ -27,5 +27,9 @@ module RedisModel
     def new_record?
       id.nil?
     end
+
+    def ==(other)
+      !new_record? && self.class == other.class && self.id == other.id
+    end
   end
 end
