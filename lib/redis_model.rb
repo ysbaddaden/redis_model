@@ -10,5 +10,7 @@ require File.expand_path('../redis_model/validations', __FILE__)
 require File.expand_path('../redis_model/persistance', __FILE__)
 require File.expand_path('../redis_model/serializers', __FILE__)
 require File.expand_path('../redis_model/finders', __FILE__)
+require File.expand_path('../redis_model/relation', __FILE__)
+require File.expand_path('../redis_model/associations', __FILE__)
 require File.expand_path('../redis_model/base', __FILE__)
 

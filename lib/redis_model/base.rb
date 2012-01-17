@@ -17,6 +17,7 @@ module RedisModel
     include RedisModel::Serializers
     include RedisModel::Finders
     include RedisModel::Validations
+    include RedisModel::Associations
 
     def initialize(attributes = {})
       @attributes = {}

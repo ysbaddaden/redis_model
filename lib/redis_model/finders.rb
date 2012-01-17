@@ -12,13 +12,7 @@ module RedisModel
       end
 
       def all
-        keys = attribute_names.sort
-        results = connection.sort(key(:all), :by => :nosort, :get => keys.collect { |k| hkey(k) })
-        collection = []
-        results.each_slice(keys.size) do |values|
-          collection << instanciate(Hash[ *keys.zip(values).flatten ])
-        end
-        collection
+        _find_all(key(:all))
       end
 
       def find(id)
@@ -47,6 +41,16 @@ module RedisModel
           record.id = attributes[:id] || attributes['id']
           record.persisted!
           record
+        end
+
+        def _find_all(key)
+          collection = []
+          keys = attribute_names.sort
+          results = connection.sort(key :by => :nosort, :get => keys.collect { |k| hkey(k) })
+          results.each_slice(keys.size) do |values|
+            collection << instanciate(Hash[ *keys.zip(values).flatten ])
+          end
+          collection
         end
     end
 
