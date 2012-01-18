@@ -52,7 +52,7 @@ module RedisModel
     end
 
     def create
-      self.id = self.class.next_id
+      self.id ||= self.class.next_id
       
       self.created_at = Time.now   if self.class.attribute_exists?(:created_at)
       self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
