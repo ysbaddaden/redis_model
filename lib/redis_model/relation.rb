@@ -1,4 +1,3 @@
-# FIXME: should pushing an unpersisted child actually save the child before proceeding?
 module RedisModel
   class Relation
     attr_reader :name, :klass, :parent, :foreign_key
@@ -39,8 +38,9 @@ module RedisModel
     def to_a
       if @collection.nil?
         @collection = []
-        connection.zrank(key, 0, -1).each do |id|
-          @collection << instanciate(connection.hgetall(klass.key(id)))
+        collection = connection.zrange(key, 0, -1) || []
+        collection.each do |id|
+          @collection << klass.send(:instanciate, connection.hgetall(klass.key(id)))
         end
         @loaded = true
       end
@@ -60,6 +60,17 @@ module RedisModel
       _remove(record.id, record)
     end
 
+    def clear
+      # cleanly removes IDs from the ZSET instead of brute deletion of the key,
+      # because it could create orphaned children on race conditions
+      to_a.each do |record|
+        connection.multi do
+          record.update_attributes(foreign_key => nil)
+          remove(record)
+        end
+      end
+    end
+
     def save
       to_a.each { |record| record.save }
     end
@@ -67,7 +78,7 @@ module RedisModel
     def create(attributes = {})
       record = klass.new(attributes.merge(name => parent))
       record.id = klass.next_id
-      redis.multi do
+      connection.multi do
         record = klass.save
         push(record)
       end
@@ -75,18 +86,21 @@ module RedisModel
     end
 
     def delete(id)
-      redis.multi do
+      connection.multi do
         record = remove_by_id(id)
         klass.delete(id)
       end
     end
 
+    # FIXME: #destroy could create an orphan in some cases
     def destroy(id)
+      # record's destroy method may execute a transaction, so we can't use
+      # a transaction here... which may generate orphaned children :(
+      # 
+      # the solution is for the record to remove itself from the list on destroy :)
       record = klass.find(id)
-      redis.multi do
-        record.destroy
-        remove(record)
-      end
+      record.destroy
+      remove(record)
     end
 
     def exists?(id)
@@ -109,10 +123,6 @@ module RedisModel
         to_a.first
       else
         id = connection.zrange(key, 0, 0).first
-        
-        p id
-        p connection.hgetall(klass.key(id))
-        
         klass.send :instanciate, connection.hgetall(klass.key(id))
       end
     end

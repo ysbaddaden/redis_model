@@ -1,4 +1,3 @@
-# FIXME: Pushing an unpersisted child shouldn't push its <nil> ID to the parent list!
 # IMPROVE: Creating a record should populate the foreign key to children.
 # IMPROVE: Saving a record should also save children.
 # IMPROVE: Deleting a record should remove it from the parent list!

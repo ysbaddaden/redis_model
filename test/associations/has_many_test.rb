@@ -1,6 +1,6 @@
 require_relative '../test_helper'
 
-class HasManyTest < Test::Unit::TestCase
+class HasManyTest < ActiveSupport::TestCase
   def test_has_many
     assert_respond_to :comments , Post.new
     assert_respond_to :comments=, Post.new
@@ -37,13 +37,20 @@ class HasManyTest < Test::Unit::TestCase
     assert_raises(RedisModel::AssociationTypeMismatch) { Post.new.comments.push(Row.new) }
   end
 
-  def test_mass_setter
-    posts(:welcome)
-  end
-
-#  def test_clear
+#  def test_mass_setter
 #    flunk
 #  end
+
+  def test_to_a
+    assert_equal [ comments(:welcome1) ], posts(:welcome).comments.to_a
+  end
+
+  def test_clear
+    posts(:welcome).comments.clear
+    assert_equal 0, posts(:welcome).comments.size
+    assert_not_nil comment = Comment.find(comments(:welcome1).id)
+    assert_nil comment.post_id
+  end
 
 #  def test_destroying_child_should_remove_it_from_parent_list
 #    flunk
