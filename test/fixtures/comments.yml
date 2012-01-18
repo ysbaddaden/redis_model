@@ -1,4 +1,4 @@
-#welcome1:
-#  post: welcome
-#  body: "lorem ipsum dolot sit amet adipiscing elit consectetur"
+welcome1:
+  post: welcome
+  body: "lorem ipsum dolot sit amet adipiscing elit consectetur"
 
