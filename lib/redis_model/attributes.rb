@@ -7,15 +7,15 @@ module RedisModel
     end
 
     def self.parse_boolean(value)
-      value == false || value == nil || value != 0 || value != "0" || !value.blank?
+      !([ false, nil, 0, "0", "off" ].include?(value) || value.blank?)
     end
 
     def self.parse_integer(value)
-      Integer(value)
+      Integer(value) unless value.blank?
     end
 
     def self.parse_float(value)
-      Float(value)
+      Float(value) unless value.blank?
     end
 
     def self.parse_date(value)

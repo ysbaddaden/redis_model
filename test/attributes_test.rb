@@ -49,6 +49,16 @@ class AttributesTest < Test::Unit::TestCase
     refute Row.new.position?
   end
 
+  def test_empty_string_integer_type
+    assert_nil Row.new(:position => "").position
+    refute Row.new.position?
+  end
+
+  def test_blank_string_integer_type
+    assert_nil Row.new(:position => " \t ").position
+    refute Row.new.position?
+  end
+
   def test_integer_type
     assert_kind_of Integer, Row.new(:position => 123).position
     assert_kind_of Integer, Row.new(:position => "123").position
@@ -56,16 +66,36 @@ class AttributesTest < Test::Unit::TestCase
     assert Row.new(:position => "123").position?
   end
 
-#  def test_nil_boolean_type
-#    assert_nil Post.new.approved
-#    assert Post.new.approved?
-#  end
+  def test_empty_string_float_type
+    assert_nil Row.new(:price => "").price
+    refute Row.new.price?
+  end
 
-#  def test_boolean_type
-#    assert_kind_of Integer, Row.new(:position => 123).position
-#    assert_kind_of Integer, Row.new(:position => "123").position
-#    assert_equal 123, Row.new(:position => "123").position
-#  end
+  def test_blank_string_float_type
+    assert_nil Row.new(:price => "  \t ").price
+    refute Row.new.price?
+  end
+
+  def test_float_type
+    assert_kind_of Float, Row.new(:price => 12.67).price
+    assert_kind_of Float, Row.new(:price => 12.67).price
+    assert_equal 12.0, Row.new(:price => "12").price
+    assert Row.new(:price => "12.67").price?
+  end
+
+  def test_boolean_type
+    assert Post.new(:approved => true).approved?
+    assert Post.new(:approved => "on").approved?,    "on is true"
+    assert Post.new(:approved => 1).approved?,       "'1' is true"
+    assert Post.new(:approved => "1").approved?,     "'1' is true"
+    refute Post.new(:approved => false).approved?
+    refute Post.new(:approved => nil).approved?,     "nil is false"
+    refute Post.new(:approved => "").approved?,      "empty string is false"
+    refute Post.new(:approved => "  \t ").approved?, "blank string is false"
+    refute Post.new(:approved => 0).approved?,       "0 is false"
+    refute Post.new(:approved => "0").approved?,     "'0' is false"
+    refute Post.new(:approved => "off").approved?,   "off is false"
+  end
 
   def test_nil_date_type
     assert_nil Row.new.created_on
