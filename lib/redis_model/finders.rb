@@ -46,7 +46,7 @@ module RedisModel
         def _find_all(key)
           collection = []
           keys = attribute_names.sort
-          results = connection.sort(key :by => :nosort, :get => keys.collect { |k| hkey(k) })
+          results = connection.sort(key, :by => :nosort, :get => keys.collect { |k| hkey(k) })
           results.each_slice(keys.size) do |values|
             collection << instanciate(Hash[ *keys.zip(values).flatten ])
           end

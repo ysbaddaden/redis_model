@@ -6,3 +6,7 @@ post1:
   title: "My first post"
   body: "Lorem ipsum dolor sit amet."
 
+uncommented:
+  title: "A post without comments"
+  body: "Who cares?"
+

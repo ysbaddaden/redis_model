@@ -14,7 +14,7 @@ class FindersTest < Test::Unit::TestCase
   end
 
   def test_all
-    assert_equal [ posts(:welcome).id, posts(:post1).id ], Post.all.collect(&:id)
+    assert_equal [ posts(:welcome).id, posts(:post1).id, posts(:uncommented).id ], Post.all.collect(&:id)
     assert_equal [], Row.all
   end
 
@@ -29,7 +29,7 @@ class FindersTest < Test::Unit::TestCase
   end
 
   def test_last
-    assert_equal posts(:post1).id, Post.last.id
+    assert_equal posts(:uncommented).id, Post.last.id
     assert_nil Row.last
   end
 

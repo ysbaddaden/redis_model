@@ -1,7 +1,13 @@
 # IMPROVE: UUID identifiers?
 # IMPROVE: counters
 module RedisModel
-  class RecordNotFound < StandardError
+  class RedisModelError < StandardError
+  end
+
+  class RecordNotFound < RedisModelError
+  end
+
+  class AssociationTypeMismatch < RedisModelError
   end
 
   class Base
