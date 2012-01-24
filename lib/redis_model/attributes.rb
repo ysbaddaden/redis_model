@@ -62,9 +62,13 @@ module RedisModel
       # 
       def attribute(attr_name, type = :string, options = {})
         attr_name = attr_name.to_sym
-        schema[attr_name] = options.merge(:type => type)
 
+        schema[attr_name] = options.merge(:type => type)
         define_attribute_methods [ attr_name ]
+
+        index(attr_name) if options[:index]
+        index(attr_name, :serial => true) if options[:serial]
+        index(attr_name, :unique => true) if options[:unique]
 
         class_eval <<-EOV
           def #{attr_name}
@@ -107,7 +111,7 @@ module RedisModel
       def schema
         return @schema unless @schema.nil?
         @schema ||= {}
-        attribute :id, :integer
+        attribute :id, :integer, :serial => true
         attr_protected :id
         @schema
       end

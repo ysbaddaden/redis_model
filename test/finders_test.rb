@@ -24,12 +24,12 @@ class FindersTest < Test::Unit::TestCase
   end
 
   def test_first
-    assert_equal posts(:welcome).id, Post.first.id
+    assert_equal posts(:welcome), Post.first
     assert_nil Row.first
   end
 
   def test_last
-    assert_equal posts(:post1).id, Post.last.id
+    assert_equal posts(:post1), Post.last
     assert_nil Row.last
   end
 
@@ -42,5 +42,10 @@ class FindersTest < Test::Unit::TestCase
     
     assert_same back, back.reload
     assert_equal "Some other title", back.title
+  end
+
+  def test_find_all_by_attr_name
+    assert_equal [ posts(:welcome) ], Post.find_all_by_approved(true)
+    assert_equal [ posts(:post1) ],   Post.find_all_by_approved(false)
   end
 end

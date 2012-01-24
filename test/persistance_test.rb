@@ -9,6 +9,11 @@ class PersistanceTest < ActiveSupport::TestCase
     assert_equal "Row:456",  Row.key(456)
   end
 
+  def test_index_key
+    assert_equal "Post:idx:id", Post.index_key(:id)
+    assert_equal "Post:idx:url", Post.index_key("url")
+  end
+
   def test_key
     assert_equal "Post:#{posts(:welcome).id}", posts(:welcome).key
   end

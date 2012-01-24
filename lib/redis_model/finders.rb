@@ -4,7 +4,7 @@ module RedisModel
 
     module ClassMethods
       def count
-        connection.llen(key(:all))
+        connection.llen(index_key(:id))
       end
 
       def hkey(attr_name)
@@ -12,13 +12,7 @@ module RedisModel
       end
 
       def all
-        keys = attribute_names.sort
-        results = connection.sort(key(:all), :by => :nosort, :get => keys.collect { |k| hkey(k) })
-        collection = []
-        results.each_slice(keys.size) do |values|
-          collection << instanciate(Hash[ *keys.zip(values).flatten ])
-        end
-        collection
+        _find_all(:id)
       end
 
       def find(id)
@@ -32,13 +26,26 @@ module RedisModel
       end
 
       def first
-        ids = connection.lrange(key(:all), 0, 0)
+        ids = connection.lrange(index_key(:id), 0, 0)
         instanciate(connection.hgetall(key(ids.first))) if ids.any?
       end
 
       def last
-        ids = connection.lrange(key(:all), -1, -1)
+        ids = connection.lrange(index_key(:id), -1, -1)
         instanciate(connection.hgetall(key(ids.first))) if ids.any?
+      end
+
+      def method_missing(method_name, *args)
+        if method_name.to_s =~ /^find_(all_by|by)_(.*)$/
+          case $1
+          when 'all_by'
+            _find_all($2, args.first)
+          when 'by'
+            super
+          end
+        else
+          super
+        end
       end
 
       protected
@@ -47,6 +54,20 @@ module RedisModel
           record.id = attributes[:id] || attributes['id']
           record.persisted!
           record
+        end
+
+        def _find_all(attr_name, value = nil)
+          keys = attribute_names.sort
+          results = connection.sort(
+            index_key(attr_name, value),
+            :by  => :nosort,
+            :get => keys.collect { |k| hkey(k) }
+          )
+          collection = []
+          results.each_slice(keys.size) do |values|
+            collection << instanciate(Hash[ *keys.zip(values).flatten ])
+          end
+          collection
         end
     end
 
