@@ -13,6 +13,39 @@ class FindersTest < Test::Unit::TestCase
     assert_raises(RedisModel::RecordNotFound) { Post.find(12346890) }
   end
 
+  def test_find_all
+    assert_equal [ posts(:welcome), posts(:post1) ], Post.find(:all)
+    assert_equal [], Row.find(:all)
+  end
+
+  def test_find_all_with_index
+    assert_equal [ posts(:welcome) ], Post.find(:all, :index => [ :approved, true ])
+    assert_equal [ posts(:post1) ],   Post.find(:all, :index => [ :approved, false ])
+  end
+
+  def test_find_all_with_select
+    posts = Post.find(:all, :select => [ :id, :title ])
+    assert_equal [ posts(:welcome).id, posts(:post1).id ], posts.collect(&:id)
+    assert_equal [ posts(:welcome).title, posts(:post1).title ], posts.collect(&:title)
+    assert_equal [ nil, nil ], posts.collect(&:body)
+  end
+
+  def test_find_all_with_order
+    assert_equal [ posts(:post1), posts(:welcome) ], Post.find(:all, :by => :title)
+  end
+
+  def test_find_all_with_limit
+  end
+
+  def test_find_first
+  end
+
+  def test_find_first_with_order
+  end
+
+  def test_find_last_with_order
+  end
+
   def test_all
     assert_equal [ posts(:welcome).id, posts(:post1).id ], Post.all.collect(&:id)
     assert_equal [], Row.all

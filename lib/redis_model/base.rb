@@ -1,7 +1,10 @@
 # IMPROVE: UUID identifiers?
 # IMPROVE: counters
 module RedisModel
-  class RecordNotFound < StandardError
+  class RedisModelError < StandardError
+  end
+
+  class RecordNotFound < RedisModelError
   end
 
   class Base
@@ -30,6 +33,13 @@ module RedisModel
 
     def ==(other)
       !new_record? && self.class == other.class && self.id == other.id
+    end
+
+    def self.instanciate(attributes)
+      record = new(attributes)
+      record.id = attributes[:id] || attributes['id']
+      record.persisted!
+      record
     end
   end
 end
