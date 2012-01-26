@@ -38,5 +38,16 @@ module RedisModel
     def ==(other)
       !new_record? && self.class == other.class && self.id == other.id
     end
+
+    def self.instanciate(attributes)
+      record = new(attributes)
+      record.id = attributes[:id] || attributes['id']
+      record.persisted!
+      record
+    end
+
+    def inspect
+      "\#<#{self.class} " + attributes.collect { |k, v| "#{k}: #{v.inspect}" }.join(", ") + ">"
+    end
   end
 end

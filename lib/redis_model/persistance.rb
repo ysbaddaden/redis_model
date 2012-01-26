@@ -3,6 +3,20 @@ module RedisModel
     extend ActiveSupport::Concern
 
     module ClassMethods
+      def indices
+        @indices ||= {}
+      end
+
+      def index(attr_name, options = {})
+        indices[attr_name.to_sym] = options
+      end
+
+      def index_key(attr_name, value = nil)
+        k = key("idx:#{attr_name}")
+        k += ":" + value.to_s unless value.nil?
+        k
+      end
+
       def key(id = nil)
         key = model_name
         key += ":" + id.to_s unless id.nil?
@@ -28,7 +42,7 @@ module RedisModel
       def delete(id)
         connection.multi do
           connection.del(key(id))
-          connection.lrem(key(:all), 0, id)
+          connection.lrem(index_key(:id), 0, id)
         end
       end
 
@@ -61,7 +75,16 @@ module RedisModel
       
       connection.multi do
         connection.hmset(key, *attributes.flatten)
-        connection.rpush(self.class.key(:all), self.id)
+        
+        self.class.indices.each do |attr_name, options|
+          if options[:unique]
+            connection.hsetnx(self.class.index_key(attr_name), id)
+          elsif options[:serial]
+            connection.rpush(self.class.index_key(attr_name), id)
+          else
+            connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
+          end
+        end
       end
       
       persisted!

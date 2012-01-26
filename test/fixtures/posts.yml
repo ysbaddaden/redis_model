@@ -1,10 +1,12 @@
 welcome:
   title: "Welcome!"
   body: "Lorem ipsum dolor sit amet consectetur adipiscing elit."
+  approved: true
 
 post1:
   title: "My first post"
   body: "Lorem ipsum dolor sit amet."
+  approved: false
 
 uncommented:
   title: "A post without comments"
