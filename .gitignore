@@ -1,3 +1,5 @@
+*.swp
+.rbx
 test/*.log
 test/*.pid
 test/*.sock

@@ -8,6 +8,7 @@ require_relative 'models/comment.rb'
 require_relative 'models/row.rb'
 
 require 'logger'
+require 'minitest/unit'
 require 'test/unit'
 require 'turn'
 require 'redis'
