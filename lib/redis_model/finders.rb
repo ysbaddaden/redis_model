@@ -24,8 +24,6 @@ module RedisModel
       # 
       # The following calls are equivalent, and will return the same record:
       # 
-      # TODO: it actually doesn't work!
-      # 
       #   post = Post.find :first, :by => :position, :order => :desc
       #   post = Post.find :last,  :by => :position, :order => :asc
       # 
@@ -81,7 +79,14 @@ module RedisModel
             :limit => limit
           )
           collection = []
-          results.each_slice(fields.size) do |values|
+          
+          # redis-rb < 3.0.0
+          #results.each_slice(fields.size) do |values|
+          #  collection << instanciate(Hash[ *fields.zip(values).flatten ])
+          #end
+          
+          # redis-rb > 3.0.0
+          results.each do |values|
             collection << instanciate(Hash[ *fields.zip(values).flatten ])
           end
           
