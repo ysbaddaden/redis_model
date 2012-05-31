@@ -8,15 +8,16 @@ require_relative 'models/comment.rb'
 require_relative 'models/row.rb'
 
 require 'logger'
+require 'minitest/unit'
 require 'test/unit'
 require 'turn'
 require 'redis'
 require_relative '../lib/redis_model/fixtures'
 
 RedisModel.connection = Redis.new(
-  :path => File.expand_path("../redis.sock", __FILE__)
+  :path => File.expand_path("../redis.sock", __FILE__),
+  :logger => Logger.new(File.expand_path("../test.log", __FILE__))
 )
-RedisModel.connection.client.logger = Logger.new(File.expand_path("../test.log", __FILE__))
 
 class Test::Unit::TestCase
   def self.fixtures_path
