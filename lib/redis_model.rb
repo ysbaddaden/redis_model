@@ -1,3 +1,5 @@
+require 'redis'
+
 require 'active_support/concern'
 require 'active_model/naming'
 require 'active_model/dirty'
