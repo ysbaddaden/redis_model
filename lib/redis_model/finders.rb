@@ -130,8 +130,7 @@ module RedisModel
           when 'all_by'
             find :all, :index => [ $2, args.first ]
           when 'by'
-#            find :first, :index = [ $2, args.first ]
-            super
+            find :first, :index => [ $2, args.first ]
           end
         else
           super
