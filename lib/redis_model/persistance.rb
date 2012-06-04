@@ -77,10 +77,11 @@ module RedisModel
         connection.hmset(key, *attributes.flatten)
         
         self.class.indices.each do |attr_name, options|
-          if options[:unique]
-            connection.hsetnx(self.class.index_key(attr_name), id)
-          elsif options[:serial]
+          if options[:serial]
             connection.rpush(self.class.index_key(attr_name), id)
+          elsif options[:unique]
+            connection.hsetnx(self.class.index_key(attr_name), send(attr_name), id)
+            connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
           else
             connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
           end
