@@ -19,6 +19,7 @@ module RedisModel
     end
 
     def self.parse_date(value)
+      return if value.blank?
       case value
       when Date
         value
@@ -30,6 +31,7 @@ module RedisModel
     end
 
     def self.parse_time(value)
+      return if value.blank?
       case value
       when Time
         value
