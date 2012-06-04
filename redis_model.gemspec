@@ -9,14 +9,10 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Julien Portalier"]
-  s.date = "2012-01-16"
+  s.date = "2012-06-04"
   s.description = "RedisModel is an ActiveModel based object mapper for the Redis NoSQL database."
   s.email = "julien@portalier.com"
-  s.extra_rdoc_files = [
-    "README.rdoc"
-  ]
   s.files = [
-    "README.rdoc",
     "lib/redis_model.rb",
     "lib/redis_model/attributes.rb",
     "lib/redis_model/base.rb",
@@ -29,7 +25,7 @@ Gem::Specification.new do |s|
   ]
   s.homepage = "http://github.com/ysbaddaden/redis_model"
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.15"
+  s.rubygems_version = "1.8.23"
   s.summary = "Object Mapper for Redis storage."
 
   if s.respond_to? :specification_version then
@@ -37,17 +33,17 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<i18n>, [">= 0"])
-      s.add_runtime_dependency(%q<activesupport>, ["~> 3.1"])
-      s.add_runtime_dependency(%q<activemodel>, ["~> 3.1"])
+      s.add_runtime_dependency(%q<activesupport>, [">= 3.1"])
+      s.add_runtime_dependency(%q<activemodel>, [">= 3.1"])
     else
       s.add_dependency(%q<i18n>, [">= 0"])
-      s.add_dependency(%q<activesupport>, ["~> 3.1"])
-      s.add_dependency(%q<activemodel>, ["~> 3.1"])
+      s.add_dependency(%q<activesupport>, [">= 3.1"])
+      s.add_dependency(%q<activemodel>, [">= 3.1"])
     end
   else
     s.add_dependency(%q<i18n>, [">= 0"])
-    s.add_dependency(%q<activesupport>, ["~> 3.1"])
-    s.add_dependency(%q<activemodel>, ["~> 3.1"])
+    s.add_dependency(%q<activesupport>, [">= 3.1"])
+    s.add_dependency(%q<activemodel>, [">= 3.1"])
   end
 end
 
