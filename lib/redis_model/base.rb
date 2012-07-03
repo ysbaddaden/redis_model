@@ -13,6 +13,7 @@ module RedisModel
     include ActiveModel::Dirty
     include ActiveModel::MassAssignmentSecurity
     include ActiveModel::Conversion
+    extend  ActiveModel::Callbacks
 
     include RedisModel::Connection
     include RedisModel::Attributes

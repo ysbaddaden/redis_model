@@ -5,6 +5,7 @@ require 'active_model/naming'
 require 'active_model/dirty'
 require 'active_model/mass_assignment_security'
 require 'active_model/conversion'
+require 'active_model/callbacks'
 
 require File.expand_path('../redis_model/attributes', __FILE__)
 require File.expand_path('../redis_model/connection', __FILE__)

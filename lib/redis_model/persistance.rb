@@ -2,6 +2,10 @@ module RedisModel
   module Persistance
     extend ActiveSupport::Concern
 
+    included do |klass|
+      define_model_callbacks :create, :update, :destroy
+    end
+
     module ClassMethods
       def indices
         @indices ||= {}
@@ -68,34 +72,38 @@ module RedisModel
     def create
       self.id = self.class.next_id
       
-      self.created_at = Time.now   if self.class.attribute_exists?(:created_at)
-      self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
-      self.created_on = Date.today if self.class.attribute_exists?(:created_on)
-      self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
-      
-      connection.multi do
-        connection.hmset(key, *attributes.flatten)
+      run_callbacks :create do
+        self.created_at = Time.now   if self.class.attribute_exists?(:created_at)
+        self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
+        self.created_on = Date.today if self.class.attribute_exists?(:created_on)
+        self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
         
-        self.class.indices.each do |attr_name, options|
-          if options[:serial]
-            connection.rpush(self.class.index_key(attr_name), id)
-          elsif options[:unique]
-            connection.hsetnx(self.class.index_key(attr_name), send(attr_name), id)
-            connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
-          else
-            connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
+        connection.multi do
+          connection.hmset(key, *attributes.flatten)
+          
+          self.class.indices.each do |attr_name, options|
+            if options[:serial]
+              connection.rpush(self.class.index_key(attr_name), id)
+            elsif options[:unique]
+              connection.hsetnx(self.class.index_key(attr_name), send(attr_name), id)
+              connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
+            else
+              connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
+            end
           end
         end
+        
+        persisted!
       end
-      
-      persisted!
     end
 
     def update
-      self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
-      self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
-      connection.hmset(key, *attributes.flatten)
-      persisted!
+      run_callbacks :update do
+        self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
+        self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
+        connection.hmset(key, *attributes.flatten)
+        persisted!
+      end
     end
 
     def update_attribute(attr_name, value)
@@ -114,7 +122,7 @@ module RedisModel
     end
 
     def destroy
-      delete
+      run_callbacks(:destroy) { delete }
       self
     end
 
