@@ -40,6 +40,7 @@ module RedisModel
       record = new(attributes)
       record.id = attributes[:id] || attributes['id']
       record.persisted!
+      record.instance_variable_set(:@previously_changed, {})
       record
     end
   end

@@ -75,6 +75,7 @@ class FindersTest < Test::Unit::TestCase
     
     assert_same back, back.reload
     assert_equal "Some other title", back.title
+    assert_equal post.id, back.id
   end
 
   def test_find_all_by_attr_name

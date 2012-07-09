@@ -97,6 +97,7 @@ module RedisModel
       end
     end
 
+    # FIXME: update (delete old, set new) indices on record update (only for changed attributes)!
     def update
       run_callbacks :update do
         self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)

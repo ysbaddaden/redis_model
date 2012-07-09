@@ -142,7 +142,9 @@ module RedisModel
       attributes = connection.hgetall(key)
       @attributes = {}
       self.attributes = attributes
+      self.id = attributes["id"] if self.class.attribute_exists?(:id)
       persisted!
+      @previously_changed = {}
       self
     end
   end

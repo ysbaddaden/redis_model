@@ -22,6 +22,7 @@ class PersistanceTest < ActiveSupport::TestCase
     assert_difference('Row.count') do
       row = Row.create(:name => "my secret")
       assert_instance_of Row, row
+      row.reload
       assert_not_nil row.id
       assert_equal "my secret", row.name
       assert_kind_of Date, row.created_on
@@ -30,6 +31,7 @@ class PersistanceTest < ActiveSupport::TestCase
     
     assert_difference('Post.count') do
       post = Post.create
+      post.reload
       assert_not_nil post.id
       assert_kind_of Integer, post.id
       assert_kind_of Time, post.created_at
