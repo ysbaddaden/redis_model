@@ -4,7 +4,7 @@ module RedisModel
 
     module ClassMethods
       def count
-        connection.llen(index_key(:id))
+        connection.scard(index_key(:id))
       end
 
       def hkey(attr_name)

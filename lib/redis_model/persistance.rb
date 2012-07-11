@@ -44,10 +44,7 @@ module RedisModel
       end
 
       def delete(id)
-        connection.multi do
-          connection.del(key(id))
-          connection.lrem(index_key(:id), 0, id)
-        end
+        find(id).delete
       end
 
       def destroy(id)
@@ -62,11 +59,7 @@ module RedisModel
     end
 
     def save
-      if new_record?
-        create
-      else
-        update
-      end
+      if new_record? then create else update end
     end
 
     def create
@@ -81,17 +74,7 @@ module RedisModel
           
           connection.multi do
             connection.hmset(key, *attributes.flatten)
-            
-            self.class.indices.each do |attr_name, options|
-              if options[:serial]
-                connection.rpush(self.class.index_key(attr_name), id)
-              elsif options[:unique]
-                connection.hsetnx(self.class.index_key(attr_name), send(attr_name), id)
-                connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
-              else
-                connection.rpush(self.class.index_key(attr_name, send(attr_name)), id)
-              end
-            end
+            update_indices
           end
           
           persisted!
@@ -99,13 +82,17 @@ module RedisModel
       end
     end
 
-    # FIXME: update (delete old, set new) indices on record update (only for changed attributes)!
     def update
       run_callbacks :save do
         run_callbacks :update do
           self.updated_at = Time.now   if self.class.attribute_exists?(:updated_at)
           self.updated_on = Date.today if self.class.attribute_exists?(:updated_on)
-          connection.hmset(key, *attributes.flatten)
+
+          connection.multi do
+            connection.hmset(key, *attributes.flatten)
+            update_indices
+          end
+
           persisted!
         end
       end
@@ -122,7 +109,8 @@ module RedisModel
     end
 
     def delete
-      self.class.delete(id)
+      connection.del(key)
+      delete_indices
       destroyed!
     end
 
@@ -147,5 +135,41 @@ module RedisModel
     def destroyed! # :nodoc:
       @destroyed = true
     end
+
+    private
+      def update_indices
+        self.class.indices.each do |attr_name, options|
+          if send("#{attr_name}_changed?")
+            was = send("#{attr_name}_was")
+            now = send(attr_name)
+            
+            if options[:serial]
+              connection.srem(self.class.index_key(attr_name), id) unless was.nil?
+              connection.sadd(self.class.index_key(attr_name), id) unless now.nil?
+            else
+              if options[:unique]
+                connection.hdel(self.class.index_key(attr_name), was) unless was.nil?
+                connection.hsetnx(self.class.index_key(attr_name), value, id) unless now.nil?
+              end
+              connection.srem(self.class.index_key(attr_name, was), id) unless was.nil?
+              connection.sadd(self.class.index_key(attr_name, send(attr_name)), id) unless now.nil?
+            end
+          end
+        end
+      end
+
+      def delete_indices
+        self.class.indices.each do |attr_name, options|
+          if options[:serial]
+            connection.srem(self.class.index_key(attr_name), id)
+          else
+            value = send(attr_name)
+            unless value.nil?
+              connection.hdel(self.class.index_key(attr_name), value) if options[:unique]
+              connection.srem(self.class.index_key(attr_name, value), id)
+            end
+          end
+        end
+      end
   end
 end
