@@ -42,71 +42,85 @@ module RedisModel
       def find(*args)
         if args.first.is_a?(Symbol)
           options = args.extract_options!
-          
-          index = (options[:index] || :id)
-          index = [ index ] unless index.kind_of?(Array)
-          limit = options[:limit]
-          by    = options[:by] unless options[:by].blank?
-          
-          if options[:order].blank?
-            order = [ :asc ] unless by.blank?
-          else
-            order = options[:order]
-            order = [ order ] unless order.kind_of?(Array)
-          end
-          unless order.nil?
-            order << :alpha unless order.include?(:alpha) && by.nil? && [ :integer, :float ].include?(schema[by][:type])
-            order = order.join(" ").upcase
-          end
-          
+          limit, by, order, index = parse_find_options(options)
+
           case args.first
           when :all
+            # pass
           when :first
-            return find_with_range(index, 0, 0) if by.nil? && order.blank?
-            limit = [ 0, 0 ]
+#            return find_with_range(index, 0, 0) if by.nil? && order.blank?
+            limit = [ 0, 1 ]
           when :last
-            return find_with_range(index, -1, -1) if by.nil? && order.blank?
-            limit = [ -1, -1 ]
+#            return find_with_range(index, -1, -1) if by.nil? && order.blank?
+            limit = [ 0, 1 ]
+            if order.include?(:asc)
+              order.delete(:asc)
+              order << :desc
+            else
+              order.delete(:desc)
+              order << :asc
+            end
           else
             raise RedisModelError.new("unknown find method #{args.first.inspect}")
           end
-          
+
           fields = (options[:select] || attribute_names).sort
           results = connection.sort(index_key(*index),
             :get   => fields.collect { |k| hkey(k) },
-            :by    => by ? hkey(by) : :nosort,
-            :order => order,
+            :by    => hkey(by),
+            :order => order.join(" ").upcase,
             :limit => limit
           )
           collection = []
-          
+
           # redis-rb < 3.0.0
           #results.each_slice(fields.size) do |values|
           #  collection << instanciate(Hash[ *fields.zip(values).flatten ])
           #end
-          
+
           # redis-rb > 3.0.0
           results.each do |values|
             collection << instanciate(Hash[ *fields.zip(values).flatten ])
           end
-          
+
           case args.first
-          when :all
-            collection
-          when :first, :last
-            collection.first
+          when :all          then collection
+          when :first, :last then collection.first
           end
         else
           find_with_id(*args)
         end
       end
 
-      def find_with_range(index, offset, limit)
+      def parse_find_options(options) # :nodoc:
+        limit = options[:limit]
+
+        by = options[:by] unless options[:by].blank?
+        by ||= :id
+
+        if options[:order].blank?
+          order = [ :asc ]
+        else
+          order = options[:order]
+          order = [ order ] unless order.kind_of?(Array)
+        end
+
+        unless order.nil? && order.include?(:alpha) && [ :integer, :float ].include?(schema[by][:type])
+          order << :alpha
+        end
+
+        index = (options[:index] || :id)
+        index = [ index ] unless index.kind_of?(Array)
+
+        [ limit, by, order, index ]
+      end
+
+      def find_with_range(index, offset, limit) # :nodoc:
         ids = connection.lrange(index_key(*index), offset, limit)
         instanciate(connection.hgetall(key(ids.first))) if ids.any?
       end
 
-      def find_with_id(id)
+      def find_with_id(id) # :nodoc:
         attributes = connection.hgetall(key(id))
         raise RedisModel::RecordNotFound.new("No such #{model_name} with id: #{id}") if attributes.empty?
         instanciate(attributes)
