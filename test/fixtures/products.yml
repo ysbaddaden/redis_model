@@ -1,0 +1,21 @@
+keyboard:
+  name:  keyboard
+  currency: EUR
+  price: 9.99
+  tva:   0.196
+  orders_count: 4
+
+mouse:
+  name:  mouse
+  currency: EUR
+  price: 9.99
+  tva:   0.196
+  orders_count: 4
+
+laptop:
+  name:  laptop
+  currency: USD
+  price: 899
+  tva:   0.196
+  orders_count: 7
+

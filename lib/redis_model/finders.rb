@@ -42,45 +42,21 @@ module RedisModel
       def find(*args)
         if args.first.is_a?(Symbol)
           options = args.extract_options!
-          limit, by, order, index = parse_find_options(options)
+          limit, by, order, fields = parse_find_options(args.first, options)
+          index, indices = index_from_find_options(options)
 
-          case args.first
-          when :all
-            # pass
-          when :first
-#            return find_with_range(index, 0, 0) if by.nil? && order.blank?
-            limit = [ 0, 1 ]
-          when :last
-#            return find_with_range(index, -1, -1) if by.nil? && order.blank?
-            limit = [ 0, 1 ]
-            if order.include?(:asc)
-              order.delete(:asc)
-              order << :desc
-            else
-              order.delete(:desc)
-              order << :asc
-            end
+          results = if indices
+            connection.multi do |multi|
+              connection.sinterstore(index, *indices)
+              _find(index, :fields => fields, :by => by, :order => order, :limit => limit)
+              connection.del(index)
+            end[1]
           else
-            raise RedisModelError.new("unknown find method #{args.first.inspect}")
+            _find(index, :fields => fields, :by => by, :order => order, :limit => limit)
           end
 
-          fields = (options[:select] || attribute_names).sort
-          results = connection.sort(index_key(*index),
-            :get   => fields.collect { |k| hkey(k) },
-            :by    => hkey(by),
-            :order => order.join(" ").upcase,
-            :limit => limit
-          )
-          collection = []
-
-          # redis-rb < 3.0.0
-          #results.each_slice(fields.size) do |values|
-          #  collection << instanciate(Hash[ *fields.zip(values).flatten ])
-          #end
-
-          # redis-rb > 3.0.0
-          results.each do |values|
-            collection << instanciate(Hash[ *fields.zip(values).flatten ])
+          collection = results.collect do |values|
+            instanciate(Hash[ *fields.zip(values).flatten ])
           end
 
           case args.first
@@ -92,33 +68,10 @@ module RedisModel
         end
       end
 
-      def parse_find_options(options) # :nodoc:
-        limit = options[:limit]
-
-        by = options[:by] unless options[:by].blank?
-        by ||= :id
-
-        if options[:order].blank?
-          order = [ :asc ]
-        else
-          order = options[:order]
-          order = [ order ] unless order.kind_of?(Array)
-        end
-
-        unless order.nil? && order.include?(:alpha) && [ :integer, :float ].include?(schema[by][:type])
-          order << :alpha
-        end
-
-        index = (options[:index] || :id)
-        index = [ index ] unless index.kind_of?(Array)
-
-        [ limit, by, order, index ]
-      end
-
-      def find_with_range(index, offset, limit) # :nodoc:
-        ids = connection.lrange(index_key(*index), offset, limit)
-        instanciate(connection.hgetall(key(ids.first))) if ids.any?
-      end
+#      def find_with_range(index, offset, limit) # :nodoc:
+#        ids = connection.lrange(index_key(*index), offset, limit)
+#        instanciate(connection.hgetall(key(ids.first))) if ids.any?
+#      end
 
       def find_with_id(id) # :nodoc:
         attributes = connection.hgetall(key(id))
@@ -150,6 +103,75 @@ module RedisModel
           super
         end
       end
+
+      private
+        def _find(index, options) # :nodoc:
+          connection.sort(index,
+            :get   => options[:fields].collect { |k| hkey(k) },
+            :by    => hkey(options[:by]),
+            :order => options[:order].join(" ").upcase,
+            :limit => options[:limit]
+          )
+        end
+
+        def index_from_find_options(options) # :nodoc:
+          if options[:conditions].nil? || options[:conditions].empty?
+            index = parse_find_index(options[:index] || :id)
+          else
+            raise RedisModelError.new(":index option isn't compatible with the :conditions option.") if options[:index]
+
+            if options[:conditions].size == 1
+              index = parse_find_index(options[:conditions].flatten)
+            else
+              index = index_key(options[:conditions].flatten.join(':'))
+              indices = options[:conditions].collect { |k,v| index_key(k, v) }
+            end
+          end
+
+          [ index, indices ]
+        end
+
+        def parse_find_index(index) # :nodoc:
+          index = [ index ] unless index.kind_of?(Array)
+          index_key(*index)
+        end
+
+        def parse_find_options(scope, options) # :nodoc:
+          limit = options[:limit]
+          by = if options[:by].blank? then :id else options[:by] end
+
+          if options[:order].blank?
+            order = [ :asc ]
+          else
+            order = options[:order]
+            order = [ order ] unless order.kind_of?(Array)
+          end
+
+          unless order.nil? && order.include?(:alpha) && [ :integer, :float ].include?(schema[by][:type])
+            order << :alpha
+          end
+
+          case scope
+          when :all
+            # pass
+          when :first
+            limit = [ 0, 1 ]
+          when :last
+            limit = [ 0, 1 ]
+            if order.include?(:asc)
+              order.delete(:asc)
+              order << :desc
+            else
+              order.delete(:desc)
+              order << :asc
+            end
+          else
+            raise RedisModelError.new("unknown find method #{args.first.inspect}")
+          end
+
+          fields = (options[:select] || attribute_names).sort
+          [ limit, by, order, fields ]
+        end
     end
 
     def reload

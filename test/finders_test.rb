@@ -23,6 +23,17 @@ class FindersTest < Test::Unit::TestCase
     assert_equal [ posts(:post1) ],   Post.find(:all, :index => [ :approved, false ])
   end
 
+  def test_find_all_with_conditions
+    assert_equal [ posts(:welcome) ],
+      Post.find(:all, :conditions => { :approved => true })
+
+    assert_equal [ products(:keyboard), products(:mouse) ],
+      Product.find(:all, :conditions => { :price => 9.99 })
+
+    assert_equal [ products(:keyboard), products(:mouse) ],
+      Product.find(:all, :conditions => { :price => 9.99, :currency => "EUR" })
+  end
+
   def test_find_all_with_select
     posts = Post.find(:all, :select => [ :id, :title ])
     assert_equal [ posts(:welcome).id, posts(:post1).id ], posts.collect(&:id)
@@ -35,15 +46,28 @@ class FindersTest < Test::Unit::TestCase
   end
 
   def test_find_all_with_limit
+    assert_equal [ posts(:welcome).id ], Post.find(:all, :limit => [0, 1]).collect(&:id)
+    assert_equal [ posts(:post1).id ], Post.find(:all, :limit => [1, 1]).collect(&:id)
   end
 
   def test_find_first
+    assert_equal posts(:welcome), Post.find(:first)
+  end
+
+  def test_find_last
+    assert_equal posts(:post1), Post.find(:last)
   end
 
   def test_find_first_with_order
+    assert_equal posts(:post1),   Post.find(:first, :by => :id, :order => :desc)
+    assert_equal posts(:post1),   Post.find(:first, :by => :title)
+    assert_equal posts(:welcome), Post.find(:first, :by => :title, :order => :desc)
   end
 
   def test_find_last_with_order
+    assert_equal posts(:welcome), Post.find(:last, :by => :id, :order => :desc)
+    assert_equal posts(:welcome), Post.find(:last, :by => :title)
+    assert_equal posts(:post1),   Post.find(:last, :by => :title, :order => :desc)
   end
 
   def test_all

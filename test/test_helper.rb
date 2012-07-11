@@ -6,6 +6,7 @@ require_relative '../lib/redis_model'
 require_relative 'models/post.rb'
 require_relative 'models/comment.rb'
 require_relative 'models/row.rb'
+require_relative 'models/product.rb'
 
 require 'logger'
 require 'minitest/unit'
