@@ -10,8 +10,8 @@ class PersistanceTest < ActiveSupport::TestCase
   end
 
   def test_index_key
-    assert_equal "Post:idx:id", Post.index_key(:id)
-    assert_equal "Post:idx:url", Post.index_key("url")
+    assert_equal "Post_idx:id", Post.index_key(:id)
+    assert_equal "Post_idx:url", Post.index_key("url")
   end
 
   def test_key

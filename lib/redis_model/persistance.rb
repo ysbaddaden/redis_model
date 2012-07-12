@@ -16,7 +16,7 @@ module RedisModel
       end
 
       def index_key(attr_name, value = nil)
-        k = key("idx:#{attr_name}")
+        k = "#{model_name}_idx:#{attr_name}"
         k += ":" + value.to_s unless value.nil?
         k
       end
