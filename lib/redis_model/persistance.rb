@@ -149,10 +149,10 @@ module RedisModel
             else
               if options[:unique]
                 connection.hdel(self.class.index_key(attr_name), was) unless was.nil?
-                connection.hsetnx(self.class.index_key(attr_name), value, id) unless now.nil?
+                connection.hsetnx(self.class.index_key(attr_name), now, id) unless now.nil?
               end
               connection.srem(self.class.index_key(attr_name, was), id) unless was.nil?
-              connection.sadd(self.class.index_key(attr_name, send(attr_name)), id) unless now.nil?
+              connection.sadd(self.class.index_key(attr_name, now), id) unless now.nil?
             end
           end
         end

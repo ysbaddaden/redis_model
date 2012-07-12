@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Julien Portalier"]
-  s.date = "2012-06-04"
+  s.date = "2012-07-12"
   s.description = "RedisModel is an ActiveModel based object mapper for the Redis NoSQL database."
   s.email = "julien@portalier.com"
   s.files = [
